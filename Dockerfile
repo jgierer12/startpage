@@ -1,12 +1,19 @@
-FROM node:16
+FROM node:16-slim
 
-EXPOSE 3000
+ENV TINI_VERSION v0.19.0
+ADD https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini /tini
+RUN chmod +x /tini
+ENTRYPOINT ["/tini", "--"]
 
 WORKDIR /app
 
-COPY . .
+ENV NODE_ENV production
+
+COPY package.json package-lock.json ./
+RUN npm ci --only=production && npm cache clean --force
+
 COPY ./config.example.json /config/config.json
+COPY . .
 
-RUN npm install
-
-CMD env NODE_ENV=production npm start
+EXPOSE 3000
+CMD ["node", "app.mjs"]
