@@ -1,12 +1,12 @@
 ---
 import RefreshIcon from "../icons/Refresh.astro";
 
-// https://stackoverflow.com/questions/10830357/javascript-toisostring-ignores-timezone-offset
-const isoDateTime = new Date();
+// use Swedish locale to get ISO date (eg. 2022-05-18)
+const time = new Date().toLocaleString('sv', { timeZone: "Europe/Berlin", timeZoneName: "short" });
 ---
 
 <footer>
-  Generated at <time>{isoDateTime}</time> <button id="rebuild-button"><RefreshIcon width="16" height="16" /></button>
+  Generated at <time>{time}</time> <button id="rebuild-button"><RefreshIcon width="16" height="16" /></button>
 </footer>
 
 <style>
