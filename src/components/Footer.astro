@@ -2,7 +2,7 @@
 import RefreshIcon from "../icons/Refresh.astro";
 
 // use Swedish locale to get ISO date (eg. 2022-05-18)
-const time = new Date().toLocaleString('sv', { timeZone: "Europe/Berlin", timeZoneName: "short" });
+const time = new Date().toLocaleString('sv', { timeZone: import.meta.env.TIMEZONE, timeZoneName: "short" });
 ---
 
 <footer>
