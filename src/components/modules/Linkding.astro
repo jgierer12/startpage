@@ -31,8 +31,8 @@ const ldData = await fetchLinkding("bookmarks");
 const links = ldData.results;
 const selectionCount = Math.min(links.length, config.modules.linkding.maxItems);
 
-const linkSelection: any[] = [];
-for (let i = 0; i < selectionCount; i++) { // repeat 3 times or less if fewer than 3 links
+const linkSelection = [];
+for (let i = 0; i < selectionCount; i++) {
   const randomIndex = Math.floor(Math.random() * links.length);
   linkSelection.push(links[randomIndex]);
   links.splice(randomIndex, 1);
