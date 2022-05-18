@@ -1,0 +1,55 @@
+---
+import RefreshIcon from "../icons/Refresh.astro";
+
+// https://stackoverflow.com/questions/10830357/javascript-toisostring-ignores-timezone-offset
+const date = new Date();
+const isoDateTime = new Date(date.getTime() - (date.getTimezoneOffset() * 60000)).toISOString().slice(0, -1);
+---
+
+<footer>
+  Generated at <time>{isoDateTime}</time> <button id="rebuild-button"><RefreshIcon width="16" height="16" /></button>
+</footer>
+
+<style>
+  footer {
+    margin: auto;
+    text-align: center;
+    font-size: 0.75rem;
+    color: var(--color-text-light);
+    vertical-align: middle;
+  }
+
+  @keyframes rotate {
+    from {
+      transform: rotate(360deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: var(--color-text-light);
+    cursor: pointer;
+    display: inline-block;
+    vertical-align: middle;
+  }
+
+  button.is-loading svg {
+    animation: rotate 1s infinite;
+  }
+</style>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.querySelector("#rebuild-button");
+    btn.addEventListener("click", async () => {
+      btn.classList.add("is-loading");
+      await fetch("/rebuild");
+      btn.classList.remove("is-loading");
+      location.reload();
+    })
+  });
+</script>

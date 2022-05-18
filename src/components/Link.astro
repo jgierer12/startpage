@@ -1,0 +1,6 @@
+---
+const props = Astro.props;
+---
+
+{ /* Reason for target="_top": https://github.com/MethodGrab/firefox-custom-new-tab-page/issues/1 */ }
+<a {...props} target="_top"><slot /></a>

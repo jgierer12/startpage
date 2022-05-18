@@ -1,0 +1,106 @@
+---
+import { median } from "stats-lite";
+
+import Link from "../Link.astro";
+import config from "@config";
+
+const tempWords = [
+  [-200, "very cold"],
+  [0, "cold"],
+  [10, "mild"],
+  [20, "warm"],
+  [25, "hot"],
+  [30, "very hot"],
+];
+const timeWords = [
+  [0, "at nighttime"],
+  [300, "at nighttime"],
+  [600, "in the early morning"],
+  [900, "in the morning"],
+  [1200, "at noon"],
+  [1500, "in the afternoon"],
+  [1800, "in the evening"],
+  [2100, "in the late evening"],
+];
+
+const joinWithAnd = (arr) => {
+  if (arr.length === 1) return arr[0];
+
+  const head = arr.slice(0, arr.length - 1);
+  const tail = arr[arr.length - 1];
+
+  return `${head.join(", ")} and ${tail}`;
+};
+
+const queryLocation = config.modules.weather.location || "";
+const wttrURLBase = `https://wttr.in/${encodeURIComponent(queryLocation)}`;
+
+const res = await fetch(wttrURLBase + "?format=j1");
+if (!res.ok) {
+  throw new Error(`Unable to fetch current weather`);
+}
+
+const data = await res.json();
+const location = data.nearest_area[0].areaName[0].value;
+const weather = data.weather[0];
+
+const temps = [];
+const conditions = [];
+
+weather.hourly.forEach(hour => {
+  const hourTime = Number(hour.time);
+  if (hourTime < 600 || hourTime >= 2100) return;
+
+  const hourTemp = Number(hour.FeelsLikeC);
+  temps.push(hourTemp);
+
+  const hourCondition = hour.weatherDesc[0].value.toLowerCase();
+  const i = conditions.findIndex(c => c.desc === hourCondition);
+  if (i === -1) {
+    conditions.push({ desc: hourCondition, times: [hourTime] });
+  } else {
+    conditions[i].times.push(hourTime);
+  }
+});
+
+let most = 0, mostIndex = -1;
+conditions.forEach((curr, i) => {
+  if (curr.times.length > most) {
+    most = curr.times.length;
+    mostIndex = i;
+  }
+});
+
+const commonCondition = conditions[mostIndex].desc;
+const otherConditions = conditions
+  .filter((curr, i) => i !== mostIndex)
+  .map((curr) => {
+    const tws = curr.times.map((currt) => {
+      const tw = timeWords.find((currtw) => currtw[0] === currt);
+      if (!tw) {
+        throw new Error(`Error while looking up time word: ${currt}`);
+      }
+      return tw[1];
+    });
+    return `${curr.desc} ${joinWithAnd(tws)}`;
+  });
+
+let conditionString = commonCondition;
+if (otherConditions.length > 0) {
+  conditionString += `, with ${joinWithAnd(otherConditions)}`;
+}
+
+const tempMin = Math.min(...temps);
+const tempMax = Math.max(...temps);
+const tempMed = median(temps);
+
+const tempWord = tempWords.reduce((acc, curr) => {
+  return tempMed >= curr[0] ? curr[1] : acc;
+}, "N/A");
+
+const msg = `The weather in ${location} today is ${conditionString}. It will be ${tempWord} today, ranging from ${tempMin}°C to ${tempMax}°C with a median of ${tempMed}°C.`;
+---
+
+<p>
+  The weather in {location} today is {conditionString}. It will be {tempWord} today, ranging from {tempMin}°C to {tempMax}°C with a median of {tempMed}°C. <Link href="https://wttr.in/Ziegetsdorf%2C%20Regensburg">More Details</Link>
+</p>

@@ -1,0 +1,60 @@
+---
+import Link from "../Link.astro";
+import { truncate } from "../../utils";
+import config from "@config";
+
+const fetchMiniflux = async (
+  endpoint,
+  query = {}
+) => {
+  if (!(import.meta.env.MINIFLUX_URL && import.meta.env.MINIFLUX_API_KEY)) {
+    throw new Error(`Missing Miniflux configuration in environment`);
+  }
+
+  const queryString = new URLSearchParams(query);
+
+  const res = await fetch(`${import.meta.env.MINIFLUX_URL}/v1/${endpoint}?${queryString}`, {
+    headers: {
+      "x-auth-token": import.meta.env.MINIFLUX_API_KEY,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Error while fetching from Miniflux API`);
+  }
+
+  const json = await res.json();
+  return json;
+};
+
+const mfData = await fetchMiniflux("entries", { status: "unread" });
+const entries = mfData.entries.map(entry => {
+  const truncTitle = truncate(entry.title);
+  const mfUrl = `${import.meta.env.MINIFLUX_URL}/unread/entry/${entry.id}`;
+
+  return {...entry, truncTitle, mfUrl};
+});
+
+const firstThreeEntries = entries.slice(0, config.modules.miniflux.maxItems);
+const restEntries = entries.slice(config.modules.miniflux.maxItems);
+
+const moreUrl = `${import.meta.env.MINIFLUX_URL}/unread`;
+---
+
+<>
+  <p>
+    You have {entries.length || "no"} unread feed {entries.length === 1 ? "article" : "articles"}{entries.length === 0 ? "." : ":"}
+  </p>
+  {entries.length > 0 && <>
+    <ul class="seamless">
+      {firstThreeEntries.map(entry => <>
+        <li>
+          <Link href={entry.mfUrl}>{entry.truncTitle}</Link>
+        </li>
+      </>)}
+    </ul>
+  </>}
+  {restEntries.length > 0 && <>
+    <p class="seamless">... and <Link href={moreUrl}>{restEntries.length} more</Link></p>
+  </>}
+</>

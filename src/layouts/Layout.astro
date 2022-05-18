@@ -1,0 +1,74 @@
+---
+const { title } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏠</text></svg>" />
+  <title>{title}</title>
+</head>
+<body>
+  <slot />
+</body>
+</html>
+
+<style>
+  :root {
+    --font-size-base: clamp(1rem, 0.34vw + 0.91rem, 1.19rem);
+    --font-size-lg: clamp(1.2rem, 0.7vw + 1.2rem, 1.5rem);
+    --font-size-xl: clamp(2.44rem, 2.38vw + 1.85rem, 3.75rem);
+
+    --color-text: hsl(200, 2%, 24%);
+    --color-text-dark: hsl(200, 2%, 12%);
+    --color-text-light: hsl(200, 2%, 75%);
+    --color-blue: hsl(200, 80%, 40%);
+    --color-blue-dark: hsl(200, 80%, 24%);
+    --color-bg: white;
+  }
+
+  html {
+    font-family: system-ui, sans-serif;
+    font-size: var(--font-size-base);
+    color: var(--color-text);
+    background-color: var(--color-bg);
+  }
+
+  body {
+    margin: 0;
+  }
+
+  :global(h1) {
+    font-size: var(--font-size-xl);
+    font-weight: normal;
+    color: var(--color-text-dark);
+  }
+
+  :global(h2) {
+    font-size: var(--font-size-lg);
+    font-weight: normal;
+    color: var(--color-text-dark);
+  }
+
+  :global(a, a:visited) {
+    color: var(--color-blue);
+  }
+  :global(a:hover) {
+    color: var(--color-blue-dark);
+  }
+
+  :global(.seamless) {
+    margin-top: -1em;
+  }
+
+  :global(ul) {
+    list-style-type: none;
+    padding: 0;
+  }
+
+  :global(time) {
+    font-variant-numeric: tabular-nums;
+  }
+</style>

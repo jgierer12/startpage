@@ -1,0 +1,90 @@
+---
+import Link from "../Link.astro";
+import config from "@config";
+
+const query = `
+query($userName: String) {
+  MediaListCollection(userName: $userName, type: ANIME) {
+    lists {
+      entries {
+        media {
+          title {
+            native
+          }
+          siteUrl
+          airingSchedule {
+            edges {
+              node {
+                airingAt
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`;
+
+const variables = {
+  userName: config.modules.anilist.username
+};
+
+const res = await fetch("https://graphql.anilist.co", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Accept": "application/json"
+  },
+  body: JSON.stringify({ query, variables })
+});
+
+if (!res.ok) {
+  throw new Error(`Error while fetching from Miniflux API`);
+}
+
+const { data } = await res.json();
+
+const allAnime = data.MediaListCollection.lists.reduce((acc, curr) => [...acc, ...curr.entries], []);
+
+const date = new Date();
+const start = date.toISOString();
+date.setUTCHours(date.getUTCHours() + 24);
+const end = date.toISOString();
+
+const episodes = allAnime.reduce((acc, curr) => {
+  const airingTimes = curr.media.airingSchedule.edges.map(({ node }) => new Date(node.airingAt*1000).toISOString());
+  const todayEpisodeIndex = airingTimes.findIndex((airingTime) => {
+    return airingTime >= start && airingTime <= end;
+  });
+
+  if (todayEpisodeIndex === -1) return acc;
+
+  const time = new Date(airingTimes[todayEpisodeIndex]).toLocaleString("en-US", {
+    timeZone: import.meta.env.TIMEZONE,
+    hour12: false,
+    timeStyle: "short",
+  });
+
+  return [...acc, {
+    ...curr.media,
+    time,
+    number: todayEpisodeIndex+1
+  }]
+}, []);
+---
+
+<>
+  <p>
+    There {episodes.length === 1 ? "is" : "are"}{" "}{episodes.length || "no"} anime {episodes.length === 1 ? "episode" : "episodes"} airing today{episodes.length === 0 ? "." : ":"}
+  </p>
+  {episodes.length > 0 && <>
+    <ul class="seamless">
+      {episodes.map(episode => <>
+        <li>
+          <Link href={episode.siteUrl}><time>{episode.time}</time> - {episode.title.native}</Link>
+        </li>
+      </>)}
+    </ul>
+  </>}
+</>

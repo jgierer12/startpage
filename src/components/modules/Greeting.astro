@@ -1,0 +1,28 @@
+---
+const date = new Date().toLocaleDateString("en-US", {
+  weekday: "long",
+  month: "long",
+  day: "numeric",
+});
+---
+
+<h2>Good <span id="greeting-word">day</span>! It is {date}.</h2>
+
+<script>
+  const timeWords = [
+    [4, "morning"],
+    [12, "afternoon"],
+    [17, "evening"],
+    [22, "night"]
+  ];
+
+  const now = new Date().getHours();
+
+  const word = timeWords.reduce((acc, curr) => {
+    return now >= curr[0] ? curr[1] : acc;
+  }, "");
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.querySelector("#greeting-word").textContent = word;
+  });
+</script>

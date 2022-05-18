@@ -1,0 +1,17 @@
+version: "2"
+services:
+  app:
+    build: .
+    volumes:
+      - config:/config
+    ports:
+      - "8120:3000"
+  filebrowser:
+    image: filebrowser/filebrowser
+    ports:
+      - "8121:80"
+    volumes:
+      - config:/srv
+
+volumes:
+  config:

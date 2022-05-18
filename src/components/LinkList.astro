@@ -1,0 +1,21 @@
+---
+import Link from "./Link.astro";
+
+const { links } = Astro.props;
+---
+
+<ul class="seamless">
+  {links.map(link => <>
+    <li><Link href={link.url}><img src={link.icon} height="16" width="16" /> {link.title}</Link></li>
+  </>)}
+</ul>
+
+<style>
+  li {
+    display: inline-block;
+    margin-right: 1em;
+  }
+  img {
+    margin-right: 5px;
+  }
+</style>

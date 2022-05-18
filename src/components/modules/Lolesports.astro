@@ -1,0 +1,79 @@
+---
+import Link from "../Link.astro";
+import config from "@config";
+
+const wantedLeagues = config.modules.lolesports.leagues;
+
+const fetchLol = async (endpoint, query = {}) => {
+  if (!import.meta.env.LOL_API_KEY) {
+    throw new Error(`No LoL API Key configured in environment`);
+  }
+
+  const queryString = new URLSearchParams({ hl: "en-US", ...query });
+
+  const res = await fetch(
+    `https://esports-api.lolesports.com/persisted/gw/${endpoint}?${queryString}`,
+    {
+      headers: {
+        "x-api-key": import.meta.env.LOL_API_KEY,
+      },
+    },
+  );
+
+  if (!res.ok) {
+    throw new Error(`Error while fetching from LoL API`);
+  }
+
+  const json = await res.json();
+  return json.data;
+};
+
+const leaguesData = await fetchLol("getLeagues");
+
+const leagueIDs = leaguesData.leagues
+  .filter((league) => wantedLeagues.includes(league.slug))
+  .map((league) => league.id);
+
+if (!leagueIDs || leagueIDs.length === 0) throw new Error(`No matching leagues found!`);
+
+const eventsData = await fetchLol("getSchedule", {
+  leagueId: leagueIDs.join(","),
+});
+
+const date = new Date();
+const start = date.toISOString();
+date.setUTCHours(date.getUTCHours() + 24);
+const end = date.toISOString();
+
+const allEvents = eventsData.schedule.events;
+const todayEvents = allEvents.filter(
+  (event) => event.startTime >= start && event.startTime <= end,
+);
+
+const events = todayEvents.map((event) => {
+  const time = new Date(event.startTime).toLocaleString("en-US", {
+    timeZone: import.meta.env.TIMEZONE,
+    hour12: false,
+    timeStyle: "short",
+  });
+
+  const liveUrl = `https://lolesports.com/live/${event.league.slug}/`;
+
+  return {...event, time, liveUrl};
+});
+---
+
+<>
+  <p>
+    There {events.length === 1 ? "is" : "are"}{" "}{events.length || "no"} League {events.length === 1 ? "match" : "matches"} today{events.length === 0 ? "." : ":"}
+  </p>
+  {events.length > 0 && <>
+    <ul class="seamless">
+      {events.map(event => <>
+        <li>
+          <Link href={event.liveUrl}><time>{event.time}</time> - [{event.league.name}] {event.match.teams[0].code} vs {event.match.teams[1].code}</Link>
+        </li>
+      </>)}
+    </ul>
+  </>}
+</>

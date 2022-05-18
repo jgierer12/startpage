@@ -1,0 +1,53 @@
+---
+import { truncate } from "../../utils";
+import Link from "../Link.astro";
+import config from "@config";
+
+const fetchLinkding = async (
+  endpoint,
+  query = {},
+) => {
+  if (!(import.meta.env.LINKDING_URL && import.meta.env.LINKDING_API_KEY)) {
+    throw new Error(`Missing Linkding configuration in environment`);
+  }
+
+  const queryString = new URLSearchParams(query);
+
+  const res = await fetch(`${import.meta.env.LINKDING_URL}/api/${endpoint}?${queryString}`, {
+    headers: {
+      "Authorization": "Token " + import.meta.env.LINKDING_API_KEY,
+    },
+  });
+
+  if (!res.ok) {
+    throw new Error(`Error while fetching from Linkding API`);
+  }
+
+  const json = await res.json();
+  return json;
+};
+
+const ldData = await fetchLinkding("bookmarks");
+const links = ldData.results;
+const selectionCount = Math.min(links.length, config.modules.linkding.maxItems);
+
+const linkSelection: any[] = [];
+for (let i = 0; i < selectionCount; i++) { // repeat 3 times or less if fewer than 3 links
+  const randomIndex = Math.floor(Math.random() * links.length);
+  linkSelection.push(links[randomIndex]);
+  links.splice(randomIndex, 1);
+}
+---
+
+<>
+  <p>
+    Today's random link selection:
+  </p>
+  <ul class="seamless">
+    {linkSelection.map(link => <>
+      <li>
+        <Link href={link.url}>{truncate(link.title || link.website_title)}</Link>
+      </li>
+    </>)}
+  </ul>
+</>

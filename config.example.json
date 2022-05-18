@@ -1,0 +1,36 @@
+{
+  "modules": {
+    "weather": {
+      "location": "Berlin"
+    },
+    "lolesports": {
+      "leagues": [
+        "worlds",
+        "all-star"
+      ]
+    },
+    "anilist": {
+      "username": "thetur1ng"
+    },
+    "miniflux": {
+      "maxItems": 3
+    },
+    "linkding": {
+      "maxItems": 3
+    },
+    "serverLinks": [
+      {
+        "url": "https://example.org",
+        "title": "Example",
+        "icon": "https://api.faviconkit.com/example.org/16"
+      }
+    ],
+    "webLinks": [
+      {
+        "url": "https://example.org",
+        "title": "Example",
+        "icon": "https://api.faviconkit.com/example.org/16"
+      }
+    ]
+  }
+}

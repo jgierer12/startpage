@@ -1,0 +1,9 @@
+---
+import LinkList from "../LinkList.astro";
+import config from "@config";
+---
+
+<>
+  <p>Server Bookmarks:</p>
+  <LinkList links={config.modules.serverLinks} />
+</>

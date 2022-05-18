@@ -1,0 +1,36 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+import Greeting from '../components/modules/Greeting.astro';
+import Weather from '../components/modules/Weather.astro';
+import Lolesports from '../components//modules/Lolesports.astro';
+import Miniflux from "../components//modules/Miniflux.astro";
+import Linkding from '../components/modules/Linkding.astro';
+import ServerLinks from '../components/modules/ServerLinks.astro';
+import WebLinks from '../components//modules/WebLinks.astro';
+import AniList from '../components/modules/AniList.astro';
+
+import Footer from '../components/Footer.astro';
+---
+
+<Layout title="Startpage">
+  <main>
+    <Greeting />
+    <Weather />
+    <Lolesports />
+    <AniList />
+    <Miniflux />
+    <Linkding />
+    <ServerLinks />
+    <WebLinks />
+  </main>
+  <Footer />
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 1em;
+    max-width: 60ch;
+  }
+</style>
